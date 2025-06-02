@@ -400,6 +400,7 @@ check_and_transform_material :: proc(world: ^World, x, y: int) {
 
 			if props.flammable && neighbor_material == .Fire {
 				world.grid[y][x] = .Fire
+				world.updated[y][x] = true
 				return
 			}
 

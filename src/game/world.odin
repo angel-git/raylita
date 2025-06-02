@@ -71,6 +71,7 @@ material_properties := []MaterialProperties {
 		is_static = false,
 		lifetime = -1,
 		rises = false,
+		transformations = {{trigger_material = .Fire, result_material = .Smoke}},
 	},
 	{
 		name = "Stone",
@@ -259,6 +260,8 @@ update_cell :: proc(world: ^World, x, y: int) {
 		}
 	}
 
+	check_and_transform_material(world, x, y)
+
 
 	if props.rises {
 		// Try to move up (for rising materials like smoke)
@@ -339,6 +342,48 @@ update_cell :: proc(world: ^World, x, y: int) {
 			}
 		}
 	}
+}
 
+@(private = "file")
+check_and_transform_material :: proc(world: ^World, x, y: int) {
+	current_material := world.grid[y][x]
+	if current_material == .Empty {
+		return
+	}
 
+	props := material_properties[int(current_material)]
+
+	// Check all neighboring cells for potential transformations
+	for dy := -1; dy <= 1; dy += 1 {
+		for dx := -1; dx <= 1; dx += 1 {
+			// Skip the current cell
+			if dx == 0 && dy == 0 {
+				continue
+			}
+
+			nx, ny := x + dx, y + dy
+
+			// Skip if outside world bounds
+			if nx < 0 || nx >= world.width || ny < 0 || ny >= world.height {
+				continue
+			}
+
+			neighbor_material := world.grid[ny][nx]
+			if neighbor_material == .Empty {
+				continue
+			}
+
+			// Check for transformations
+			for transformation in props.transformations {
+				if neighbor_material == transformation.trigger_material {
+					// Transform the current material
+					world.grid[y][x] = transformation.result_material
+					// Flag this cell as updated to prevent processing it again this frame
+					world.updated[y][x] = true
+					return
+				}
+			}
+
+		}
+	}
 }

@@ -13,6 +13,7 @@ MaterialType :: enum u8 {
 	Stone,
 	Fire,
 	Smoke,
+	Oil,
 }
 
 MaterialProperties :: struct {
@@ -24,6 +25,7 @@ MaterialProperties :: struct {
 	is_static:         bool,
 	rises:             bool,
 	lifetime:          int, // -1 always 0-100%
+	flammable:         bool,
 	transformations:   []MaterialTransformation,
 }
 
@@ -102,6 +104,18 @@ material_properties := []MaterialProperties {
 		is_static = false,
 		lifetime = 2,
 		rises = true,
+	},
+	{
+		name = "Oil",
+		color = rl.DARKBROWN,
+		alternative_color = rl.DARKBROWN,
+		density = 2.0,
+		is_liquid = true,
+		is_static = false,
+		lifetime = -1,
+		rises = false,
+		flammable = true,
+		transformations = {{trigger_material = .Fire, result_material = .Smoke}},
 	},
 }
 
@@ -382,6 +396,11 @@ check_and_transform_material :: proc(world: ^World, x, y: int) {
 					world.updated[y][x] = true
 					return
 				}
+			}
+
+			if props.flammable && neighbor_material == .Fire {
+				world.grid[y][x] = .Fire
+				return
 			}
 
 		}

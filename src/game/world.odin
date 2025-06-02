@@ -23,6 +23,7 @@ MaterialProperties :: struct {
 	is_liquid:         bool,
 	is_static:         bool,
 	rises:             bool,
+	lifetime:          int, // -1 always 0-100%
 	transformations:   []MaterialTransformation,
 }
 
@@ -48,6 +49,7 @@ material_properties := []MaterialProperties {
 		density = 0.0,
 		is_liquid = false,
 		is_static = true,
+		lifetime = -1,
 		rises = false,
 	},
 	{
@@ -57,6 +59,7 @@ material_properties := []MaterialProperties {
 		density = 2.0,
 		is_liquid = false,
 		is_static = false,
+		lifetime = -1,
 		rises = false,
 	},
 	{
@@ -66,6 +69,7 @@ material_properties := []MaterialProperties {
 		density = 1.0,
 		is_liquid = true,
 		is_static = false,
+		lifetime = -1,
 		rises = false,
 	},
 	{
@@ -75,6 +79,7 @@ material_properties := []MaterialProperties {
 		density = 3.0,
 		is_liquid = false,
 		is_static = true,
+		lifetime = -1,
 		rises = false,
 	},
 	{
@@ -84,6 +89,7 @@ material_properties := []MaterialProperties {
 		density = 2.0,
 		is_liquid = true,
 		is_static = false,
+		lifetime = 1,
 		rises = false,
 	},
 	{
@@ -93,6 +99,7 @@ material_properties := []MaterialProperties {
 		density = 1.0,
 		is_liquid = false,
 		is_static = false,
+		lifetime = 2,
 		rises = true,
 	},
 }
@@ -244,6 +251,14 @@ update_cell :: proc(world: ^World, x, y: int) {
 
 	// Mark this cell as updated
 	world.updated[y][x] = true
+
+	if props.lifetime > 0 {
+		if rand.int31_max(100) < i32(props.lifetime) {
+			world.grid[y][x] = .Empty
+			return
+		}
+	}
+
 
 	if props.rises {
 		// Try to move up (for rising materials like smoke)

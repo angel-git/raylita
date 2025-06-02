@@ -62,6 +62,8 @@ handle_events :: proc() {
 		game.current_material = .Water
 	} else if rl.IsKeyPressed(.THREE) {
 		game.current_material = .Stone
+	} else if rl.IsKeyPressed(.FOUR) {
+		game.current_material = .Fire
 	}
 
 	if rl.IsKeyPressed(.LEFT_BRACKET) && game.brush_size > 1 {

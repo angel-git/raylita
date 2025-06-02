@@ -11,14 +11,16 @@ MaterialType :: enum u8 {
 	Sand,
 	Water,
 	Stone,
+	Fire,
 }
 
 MaterialProperties :: struct {
-	name:      string,
-	color:     rl.Color,
-	density:   f32,
-	is_liquid: bool,
-	is_static: bool,
+	name:              string,
+	color:             rl.Color,
+	alternative_color: rl.Color,
+	density:           f32,
+	is_liquid:         bool,
+	is_static:         bool,
 }
 World :: struct {
 	width:     int, // 100
@@ -31,10 +33,46 @@ World :: struct {
 
 // Material properties lookup
 material_properties := []MaterialProperties {
-	{name = "Empty", color = rl.BLACK, density = 0.0, is_liquid = false, is_static = true},
-	{name = "Sand", color = rl.GOLD, density = 2.0, is_liquid = false, is_static = false},
-	{name = "Water", color = rl.BLUE, density = 1.0, is_liquid = true, is_static = false},
-	{name = "Stone", color = rl.GRAY, density = 3.0, is_liquid = false, is_static = true},
+	{
+		name = "Empty",
+		color = rl.BLACK,
+		alternative_color = rl.BLACK,
+		density = 0.0,
+		is_liquid = false,
+		is_static = true,
+	},
+	{
+		name = "Sand",
+		color = rl.GOLD,
+		alternative_color = rl.GOLD,
+		density = 2.0,
+		is_liquid = false,
+		is_static = false,
+	},
+	{
+		name = "Water",
+		color = rl.BLUE,
+		alternative_color = rl.DARKBLUE,
+		density = 1.0,
+		is_liquid = true,
+		is_static = false,
+	},
+	{
+		name = "Stone",
+		color = rl.GRAY,
+		alternative_color = rl.GRAY,
+		density = 3.0,
+		is_liquid = false,
+		is_static = true,
+	},
+	{
+		name = "Fire",
+		color = rl.RED,
+		alternative_color = rl.ORANGE,
+		density = 2.0,
+		is_liquid = true,
+		is_static = false,
+	},
 }
 
 // Initialize a new world
@@ -92,12 +130,19 @@ render_world :: proc(world: ^World, pos_x, pos_y: int) {
 				screen_y := pos_y + int(f32(y) * world.cell_size)
 				cell_size := int(world.cell_size)
 
+				// random color
+				color := props.color
+				dx := rand.int31_max(2) * 2 - 1 // -1 or 1
+				if (dx < 0) {
+					color = props.alternative_color
+				}
+
 				rl.DrawRectangle(
 					i32(screen_x),
 					i32(screen_y),
 					i32(cell_size),
 					i32(cell_size),
-					props.color,
+					color,
 				)
 			}
 		}

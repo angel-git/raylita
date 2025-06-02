@@ -97,7 +97,7 @@ handle_events :: proc() {
 @(private = "file")
 render :: proc() {
 	rl.BeginDrawing()
-	rl.ClearBackground(rl.BLACK)
+	rl.ClearBackground(rl.RAYWHITE)
 
 	render_world(&game.world, 0, 0)
 

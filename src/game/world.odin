@@ -46,7 +46,7 @@ World :: struct {
 material_properties := []MaterialProperties {
 	{
 		name = "Empty",
-		color = rl.BLACK,
+		color = {0, 0, 0, 0},
 		alternative_color = rl.BLACK,
 		density = 0.0,
 		is_liquid = false,
@@ -89,11 +89,12 @@ material_properties := []MaterialProperties {
 		name = "Fire",
 		color = rl.RED,
 		alternative_color = rl.ORANGE,
-		density = 2.0,
+		density = 1.0,
 		is_liquid = true,
 		is_static = false,
 		lifetime = 1,
 		rises = false,
+		transformations = {{trigger_material = .Water, result_material = .Smoke}},
 	},
 	{
 		name = "Smoke",

@@ -64,6 +64,8 @@ handle_events :: proc() {
 		game.current_material = .Stone
 	} else if rl.IsKeyPressed(.FOUR) {
 		game.current_material = .Fire
+	} else if rl.IsKeyPressed(.FIVE) {
+		game.current_material = .Smoke
 	}
 
 	if rl.IsKeyPressed(.LEFT_BRACKET) && game.brush_size > 1 {

@@ -12,6 +12,7 @@ MaterialType :: enum u8 {
 	Water,
 	Stone,
 	Fire,
+	Smoke,
 }
 
 MaterialProperties :: struct {
@@ -21,6 +22,13 @@ MaterialProperties :: struct {
 	density:           f32,
 	is_liquid:         bool,
 	is_static:         bool,
+	rises:             bool,
+	transformations:   []MaterialTransformation,
+}
+
+MaterialTransformation :: struct {
+	trigger_material: MaterialType, // Material that causes the transformation
+	result_material:  MaterialType, // Material that results from the transformation
 }
 World :: struct {
 	width:     int, // 100
@@ -40,6 +48,7 @@ material_properties := []MaterialProperties {
 		density = 0.0,
 		is_liquid = false,
 		is_static = true,
+		rises = false,
 	},
 	{
 		name = "Sand",
@@ -48,6 +57,7 @@ material_properties := []MaterialProperties {
 		density = 2.0,
 		is_liquid = false,
 		is_static = false,
+		rises = false,
 	},
 	{
 		name = "Water",
@@ -56,6 +66,7 @@ material_properties := []MaterialProperties {
 		density = 1.0,
 		is_liquid = true,
 		is_static = false,
+		rises = false,
 	},
 	{
 		name = "Stone",
@@ -64,6 +75,7 @@ material_properties := []MaterialProperties {
 		density = 3.0,
 		is_liquid = false,
 		is_static = true,
+		rises = false,
 	},
 	{
 		name = "Fire",
@@ -72,6 +84,16 @@ material_properties := []MaterialProperties {
 		density = 2.0,
 		is_liquid = true,
 		is_static = false,
+		rises = false,
+	},
+	{
+		name = "Smoke",
+		color = rl.DARKGRAY,
+		alternative_color = rl.GRAY,
+		density = 1.0,
+		is_liquid = false,
+		is_static = false,
+		rises = true,
 	},
 }
 
@@ -223,54 +245,85 @@ update_cell :: proc(world: ^World, x, y: int) {
 	// Mark this cell as updated
 	world.updated[y][x] = true
 
-	// Try to move down
-	if can_move_into(world, x, y + 1, material) {
-		world.grid[y][x] = world.grid[y + 1][x]
-		world.grid[y + 1][x] = material
-		world.updated[y + 1][x] = true
-		return
-	}
+	if props.rises {
+		// Try to move up (for rising materials like smoke)
+		if y > 0 && can_move_into(world, x, y - 1, material) {
+			world.grid[y][x] = world.grid[y - 1][x]
+			world.grid[y - 1][x] = material
+			world.updated[y - 1][x] = true
+			return
+		}
 
-	// For liquids and falling particles, try to move diagonally
-	if !props.is_static {
 		// Choose randomly between left and right diagonal first
 		dx := rand.int31_max(2) * 2 - 1 // -1 or 1
 
-		// Try diagonal down
-		if can_move_into(world, x + int(dx), y + 1, material) {
-			world.grid[y][x] = world.grid[y + 1][x + int(dx)]
-			world.grid[y + 1][x + int(dx)] = material
-			world.updated[y + 1][x + int(dx)] = true
+		// Try diagonal up
+		if y > 0 && can_move_into(world, x + int(dx), y - 1, material) {
+			world.grid[y][x] = world.grid[y - 1][x + int(dx)]
+			world.grid[y - 1][x + int(dx)] = material
+			world.updated[y - 1][x + int(dx)] = true
 			return
 		}
 
-		// Try opposite diagonal
-		if can_move_into(world, x - int(dx), y + 1, material) {
-			world.grid[y][x] = world.grid[y + 1][x - int(dx)]
-			world.grid[y + 1][x - int(dx)] = material
-			world.updated[y + 1][x - int(dx)] = true
+		// Try opposite diagonal up
+		if y > 0 && can_move_into(world, x - int(dx), y - 1, material) {
+			world.grid[y][x] = world.grid[y - 1][x - int(dx)]
+			world.grid[y - 1][x - int(dx)] = material
+			world.updated[y - 1][x - int(dx)] = true
 			return
+		}
+	} else {
+		// Try to move down
+		if can_move_into(world, x, y + 1, material) {
+			world.grid[y][x] = world.grid[y + 1][x]
+			world.grid[y + 1][x] = material
+			world.updated[y + 1][x] = true
+			return
+		}
+
+		// For liquids and falling particles, try to move diagonally
+		if !props.is_static {
+			// Choose randomly between left and right diagonal first
+			dx := rand.int31_max(2) * 2 - 1 // -1 or 1
+
+			// Try diagonal down
+			if can_move_into(world, x + int(dx), y + 1, material) {
+				world.grid[y][x] = world.grid[y + 1][x + int(dx)]
+				world.grid[y + 1][x + int(dx)] = material
+				world.updated[y + 1][x + int(dx)] = true
+				return
+			}
+
+			// Try opposite diagonal
+			if can_move_into(world, x - int(dx), y + 1, material) {
+				world.grid[y][x] = world.grid[y + 1][x - int(dx)]
+				world.grid[y + 1][x - int(dx)] = material
+				world.updated[y + 1][x - int(dx)] = true
+				return
+			}
+		}
+
+		// For liquids, try moving sideways
+		if props.is_liquid {
+			// Choose randomly between left and right
+			dx := rand.int31_max(2) * 2 - 1 // -1 or 1
+
+			if can_move_into(world, x + int(dx), y, material) {
+				world.grid[y][x] = world.grid[y][x + int(dx)]
+				world.grid[y][x + int(dx)] = material
+				world.updated[y][x + int(dx)] = true
+				return
+			}
+
+			// Try opposite side
+			if can_move_into(world, x - int(dx), y, material) {
+				world.grid[y][x] = world.grid[y][x - int(dx)]
+				world.grid[y][x - int(dx)] = material
+				world.updated[y][x - int(dx)] = true
+				return
+			}
 		}
 	}
 
-	// For liquids, try moving sideways
-	if props.is_liquid {
-		// Choose randomly between left and right
-		dx := rand.int31_max(2) * 2 - 1 // -1 or 1
 
-		if can_move_into(world, x + int(dx), y, material) {
-			world.grid[y][x] = world.grid[y][x + int(dx)]
-			world.grid[y][x + int(dx)] = material
-			world.updated[y][x + int(dx)] = true
-			return
-		}
-
-		// Try opposite side
-		if can_move_into(world, x - int(dx), y, material) {
-			world.grid[y][x] = world.grid[y][x - int(dx)]
-			world.grid[y][x - int(dx)] = material
-			world.updated[y][x - int(dx)] = true
-			return
-		}
-	}
 }

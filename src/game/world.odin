@@ -180,7 +180,7 @@ update_cell :: proc(world: ^World, x, y: int) {
 
 	// Try to move down
 	if can_move_into(world, x, y + 1, material) {
-		world.grid[y][x] = .Empty
+		world.grid[y][x] = world.grid[y + 1][x]
 		world.grid[y + 1][x] = material
 		world.updated[y + 1][x] = true
 		return
@@ -193,7 +193,7 @@ update_cell :: proc(world: ^World, x, y: int) {
 
 		// Try diagonal down
 		if can_move_into(world, x + int(dx), y + 1, material) {
-			world.grid[y][x] = .Empty
+			world.grid[y][x] = world.grid[y + 1][x + int(dx)]
 			world.grid[y + 1][x + int(dx)] = material
 			world.updated[y + 1][x + int(dx)] = true
 			return
@@ -201,7 +201,7 @@ update_cell :: proc(world: ^World, x, y: int) {
 
 		// Try opposite diagonal
 		if can_move_into(world, x - int(dx), y + 1, material) {
-			world.grid[y][x] = .Empty
+			world.grid[y][x] = world.grid[y + 1][x - int(dx)]
 			world.grid[y + 1][x - int(dx)] = material
 			world.updated[y + 1][x - int(dx)] = true
 			return
@@ -214,7 +214,7 @@ update_cell :: proc(world: ^World, x, y: int) {
 		dx := rand.int31_max(2) * 2 - 1 // -1 or 1
 
 		if can_move_into(world, x + int(dx), y, material) {
-			world.grid[y][x] = .Empty
+			world.grid[y][x] = world.grid[y][x + int(dx)]
 			world.grid[y][x + int(dx)] = material
 			world.updated[y][x + int(dx)] = true
 			return
@@ -222,7 +222,7 @@ update_cell :: proc(world: ^World, x, y: int) {
 
 		// Try opposite side
 		if can_move_into(world, x - int(dx), y, material) {
-			world.grid[y][x] = .Empty
+			world.grid[y][x] = world.grid[y][x - int(dx)]
 			world.grid[y][x - int(dx)] = material
 			world.updated[y][x - int(dx)] = true
 			return

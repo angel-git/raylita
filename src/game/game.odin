@@ -56,7 +56,9 @@ handle_events :: proc() {
 		clear_world(&game.world)
 	}
 
-	if rl.IsKeyPressed(.ONE) {
+	if rl.IsKeyPressed(.ZERO) {
+		game.current_material = .Empty
+	} else if rl.IsKeyPressed(.ONE) {
 		game.current_material = .Sand
 	} else if rl.IsKeyPressed(.TWO) {
 		game.current_material = .Water
@@ -103,15 +105,7 @@ render :: proc() {
 
 	render_brush(&game.world, int(mouse_x), int(mouse_y), game.current_material, game.brush_size)
 
-	rl.DrawText(
-		rl.TextFormat("Material: %s", material_properties[int(game.current_material)].name),
-		10,
-		30,
-		20,
-		rl.WHITE,
-	)
-	rl.DrawText(rl.TextFormat("Brush Size: %d", game.brush_size), 10, 50, 20, rl.WHITE)
-
+	render_editor(&game)
 
 	if game.is_paused {
 		rl.DrawText("PAUSED", 10, 70, 20, rl.YELLOW)

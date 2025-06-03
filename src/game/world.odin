@@ -17,6 +17,7 @@ MaterialType :: enum u8 {
 }
 
 MaterialProperties :: struct {
+	type:              MaterialType,
 	name:              string,
 	color:             rl.Color,
 	alternative_color: rl.Color,
@@ -45,6 +46,7 @@ World :: struct {
 // Material properties lookup
 material_properties := []MaterialProperties {
 	{
+		type = .Empty,
 		name = "Empty",
 		color = {0, 0, 0, 0},
 		alternative_color = rl.BLACK,
@@ -55,6 +57,7 @@ material_properties := []MaterialProperties {
 		rises = false,
 	},
 	{
+		type = .Sand,
 		name = "Sand",
 		color = rl.GOLD,
 		alternative_color = rl.GOLD,
@@ -65,6 +68,7 @@ material_properties := []MaterialProperties {
 		rises = false,
 	},
 	{
+		type = .Water,
 		name = "Water",
 		color = rl.BLUE,
 		alternative_color = rl.DARKBLUE,
@@ -76,6 +80,7 @@ material_properties := []MaterialProperties {
 		transformations = {{trigger_material = .Fire, result_material = .Smoke}},
 	},
 	{
+		type = .Stone,
 		name = "Stone",
 		color = rl.GRAY,
 		alternative_color = rl.GRAY,
@@ -86,6 +91,7 @@ material_properties := []MaterialProperties {
 		rises = false,
 	},
 	{
+		type = .Fire,
 		name = "Fire",
 		color = rl.RED,
 		alternative_color = rl.ORANGE,
@@ -97,6 +103,7 @@ material_properties := []MaterialProperties {
 		transformations = {{trigger_material = .Water, result_material = .Smoke}},
 	},
 	{
+		type = .Smoke,
 		name = "Smoke",
 		color = rl.DARKGRAY,
 		alternative_color = rl.GRAY,
@@ -107,6 +114,7 @@ material_properties := []MaterialProperties {
 		rises = true,
 	},
 	{
+		type = .Oil,
 		name = "Oil",
 		color = rl.DARKBROWN,
 		alternative_color = rl.DARKBROWN,

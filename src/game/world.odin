@@ -133,13 +133,6 @@ new_world :: proc() -> World {
 }
 
 
-screen_to_grid :: proc(world: ^World, screen_x, screen_y, offset_x, offset_y: int) -> (int, int) {
-	grid_x := int(f32(screen_x - offset_x) / world.cell_size)
-	grid_y := int(f32(screen_y - offset_y) / world.cell_size)
-
-	return grid_x, grid_y
-}
-
 clear_world :: proc(world: ^World) {
 	for y := 0; y < world.height; y += 1 {
 		for x := 0; x < world.width; x += 1 {
@@ -164,15 +157,15 @@ update_world :: proc(world: ^World) {
 	}
 }
 
-render_world :: proc(world: ^World, pos_x, pos_y: int) {
+render_world :: proc(world: ^World) {
 	for y := 0; y < world.height; y += 1 {
 		for x := 0; x < world.width; x += 1 {
 			material := world.grid[y][x]
 			if material != .Empty {
 				props := material_properties[int(material)]
 
-				screen_x := pos_x + int(f32(x) * world.cell_size)
-				screen_y := pos_y + int(f32(y) * world.cell_size)
+				screen_x := int(f32(x) * world.cell_size)
+				screen_y := int(f32(y) * world.cell_size)
 				cell_size := int(world.cell_size)
 
 				// random color
@@ -196,10 +189,12 @@ render_world :: proc(world: ^World, pos_x, pos_y: int) {
 
 add_material_with_brush :: proc(
 	world: ^World,
-	x, y: int,
+	screen_x, screen_y: int,
 	material: MaterialType,
 	brush_size: int,
 ) {
+	grid_x, grid_y := screen_to_grid(world, screen_x, screen_y)
+
 	for by := -brush_size; by <= brush_size; by += 1 {
 		for bx := -brush_size; bx <= brush_size; bx += 1 {
 			// Skip if outside brush radius
@@ -207,8 +202,8 @@ add_material_with_brush :: proc(
 				continue
 			}
 
-			target_x := x + bx
-			target_y := y + by
+			target_x := grid_x + bx
+			target_y := grid_y + by
 
 			// Skip if outside world bounds
 			if target_x < 0 ||
@@ -220,8 +215,34 @@ add_material_with_brush :: proc(
 
 			// Set material at this position
 			world.grid[target_y][target_x] = material
+
 		}
 	}
+}
+
+render_brush :: proc(
+	world: ^World,
+	screen_x, screen_y: int,
+	material: MaterialType,
+	brush_size: int,
+) {
+	grid_x, grid_y := screen_to_grid(world, screen_x, screen_y)
+
+	props := material_properties[int(material)]
+
+	center_x := int(f32(grid_x) * world.cell_size + world.cell_size / 2)
+	center_y := int(f32(grid_y) * world.cell_size + world.cell_size / 2)
+	radius := int(f32(brush_size) * world.cell_size)
+	rl.DrawCircle(i32(center_x), i32(center_y), f32(radius), rl.ColorAlpha(props.color, 0.5))
+}
+
+
+@(private = "file")
+screen_to_grid :: proc(world: ^World, screen_x, screen_y: int) -> (int, int) {
+	grid_x := int(f32(screen_x) / world.cell_size)
+	grid_y := int(f32(screen_y) / world.cell_size)
+
+	return grid_x, grid_y
 }
 
 

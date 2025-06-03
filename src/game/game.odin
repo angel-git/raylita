@@ -80,14 +80,11 @@ handle_events :: proc() {
 		mouse_x := rl.GetMouseX()
 		mouse_y := rl.GetMouseY()
 
-		// Convert screen coordinates to grid coordinates
-		grid_x, grid_y := screen_to_grid(&game.world, int(mouse_x), int(mouse_y), 0, 0)
-
 		// Add material at the mouse position
 		add_material_with_brush(
 			&game.world,
-			grid_x,
-			grid_y,
+			int(mouse_x),
+			int(mouse_y),
 			game.current_material,
 			game.brush_size,
 		)
@@ -99,7 +96,12 @@ render :: proc() {
 	rl.BeginDrawing()
 	rl.ClearBackground(rl.RAYWHITE)
 
-	render_world(&game.world, 0, 0)
+	render_world(&game.world)
+
+	mouse_x := rl.GetMouseX()
+	mouse_y := rl.GetMouseY()
+
+	render_brush(&game.world, int(mouse_x), int(mouse_y), game.current_material, game.brush_size)
 
 	rl.DrawText(
 		rl.TextFormat("Material: %s", material_properties[int(game.current_material)].name),

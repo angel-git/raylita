@@ -81,7 +81,7 @@ handle_events :: proc() {
 		mouse_y := rl.GetMouseY()
 
 		// Convert screen coordinates to grid coordinates
-		grid_x, grid_y := screen_to_grid(&game.world, int(mouse_x), int(mouse_y), 50, 50)
+		grid_x, grid_y := screen_to_grid(&game.world, int(mouse_x), int(mouse_y), 0, 0)
 
 		// Add material at the mouse position
 		add_material_with_brush(

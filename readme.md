@@ -1,5 +1,7 @@
 # Raylita - A noita like simulation
 
+[sample.mp4](sample.mp4)
+
 ## Compile & Run
 
 ```

@@ -1,6 +1,6 @@
 # Raylita - A noita like simulation
 
-<video src="sample.mp4" controls></video>
+https://github.com/user-attachments/assets/196568d4-e50c-4c77-9e99-ecd49188cf92
 
 ## Compile & Run
 
